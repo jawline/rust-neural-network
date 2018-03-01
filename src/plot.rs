@@ -21,5 +21,6 @@ pub fn plot(maxx: f64, miny: f64, maxy: f64, good_points: Vec<Vec<f64>>, bad_poi
 			&(extract(&bad_points, 1)),
 			&[Color("red")]
 		);
+
 	fg.show();
 }

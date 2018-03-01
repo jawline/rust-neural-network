@@ -23,7 +23,4 @@ impl Neuron {
 		self.bias += delta * learn_rate;
 	}
 
-	pub fn debug(self: &Neuron) {
-		println!("Perceptron {:?} {}", self.weights, self.bias);
-	}
 }
