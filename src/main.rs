@@ -1,40 +1,11 @@
 extern crate rand;
 extern crate gnuplot;
 
+mod neuron;
+
+use neuron::Neuron;
 use rand::Rng;
 use gnuplot::{Figure, Caption, Color};
-
-struct Neuron {
-	weights: Vec<f64>,
-	bias: f64
-}
-
-impl Neuron {
-	fn new(weights: Vec<f64>, bias: f64) -> Neuron {
-		Neuron {
-			weights: weights.clone(),
-			bias: bias
-		}
-	}
-
-	fn step(self: &Neuron, sum: f64) -> f64 {
-		if sum > 0.0 { 1.0 } else { 0.0 }
-	}
-
-	fn process(self: &Neuron, input: Vec<f64>) -> f64 {
-		let sum = self.bias + input.iter().zip(self.weights.iter()).fold(0.0, |last, (input, weight)| last + (input * weight));
-		self.step(sum)
-	}
-
-	fn adjust(self: &mut Neuron, inputs: Vec<f64>, delta: f64, learn_rate: f64) {
-		self.weights = self.weights.iter().zip(inputs.iter()).map(|(weight, input)| weight + (input * delta * learn_rate)).collect();
-		self.bias += delta * learn_rate;
-	}
-
-	fn debug(self: &Neuron) {
-		println!("Perceptron {:?} {}", self.weights, self.bias);
-	}
-}
 
 fn cf(x: f64) -> f64 {
 	1.0 * x + 4.0
