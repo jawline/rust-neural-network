@@ -1,13 +1,12 @@
 extern crate rand;
 extern crate gnuplot;
 
-use rand::{Rng};
+use rand::Rng;
 use gnuplot::{Figure, Caption, Color};
 
 struct Neuron {
 	weights: Vec<f64>,
 	bias: f64
-
 }
 
 impl Neuron {
@@ -48,7 +47,7 @@ fn c1(x: f64, y: f64) -> f64 {
 fn train(p: &mut Neuron, rounds: usize, factor: f64) {
 	let mut rng = rand::thread_rng();
 	(0..rounds).for_each(|_| {
-		let input = [rng.gen::<f64>() * 100.0, rng.gen::<f64>() * 100.0].to_vec();
+		let input = [rng.gen::<f64>() * 100.0, rng.gen::<f64>() * 120.0].to_vec();
 		let found = p.process(input.clone());
 		let expected = c1(input[0], input[1]);
 		p.adjust(input, expected - found, factor);
@@ -58,6 +57,10 @@ fn train(p: &mut Neuron, rounds: usize, factor: f64) {
 fn make_guess(p: &Neuron, input: &Vec<f64>) -> bool {
 	let found = p.process(input.clone());
 	found == c1(input[0], input[1])
+}
+
+fn extract(points: &Vec<Vec<f64>>, index: usize) -> Vec<f64> {
+	points.iter().map(|x| x[index]).collect()
 }
 
 fn main() {
@@ -85,7 +88,7 @@ fn main() {
 	let mut fg = Figure::new();
 
 	for _ in 0..attempts {
-		let input = [rng.gen::<f64>() * 100.0, rng.gen::<f64>() * 100.0].to_vec();
+		let input = [rng.gen::<f64>() * 100.0, rng.gen::<f64>() * 120.0].to_vec();
 		if !make_guess(&perceptron, &input) {
 			bad_points.push(input);
 		} else {
@@ -100,12 +103,12 @@ fn main() {
 
 	fg.axes2d().lines(&x, &y, &[Caption("The dividing line"), Color("black")])
 		.points(
-			&(good_points.iter().map(|ref p| p[0]).collect::<Vec<f64>>()),
-			&(good_points.iter().map(|ref p| p[1]).collect::<Vec<f64>>()),
+			&(extract(&good_points, 0)),
+			&(extract(&good_points, 1)),
 			&[Color("green")]
 		).points(
-			&(bad_points.iter().map(|ref p| p[0]).collect::<Vec<f64>>()),
-			&(bad_points.iter().map(|ref p| p[1]).collect::<Vec<f64>>()),
+			&(extract(&bad_points, 0)),
+			&(extract(&bad_points, 1)),
 			&[Color("red")]
 		);
 	fg.show();
