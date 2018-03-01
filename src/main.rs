@@ -5,6 +5,7 @@ mod neuron;
 mod train;
 mod plot;
 mod steps;
+mod network;
 
 use neuron::Neuron;
 use rand::Rng;

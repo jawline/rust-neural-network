@@ -23,4 +23,8 @@ impl Neuron {
 		self.bias += delta * learn_rate;
 	}
 
+	pub fn expected(self: &Neuron) -> usize {
+		self.weights.len()
+	}
+
 }
