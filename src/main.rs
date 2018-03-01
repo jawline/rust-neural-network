@@ -25,21 +25,26 @@ fn make_guess(p: &Neuron, input: &Vec<f64>) -> bool {
 
 const CLASSIFY_FUNCTION: &'static Fn(f64, f64) -> f64 = &|x, y| c1(x, y);
 
+const RANDOM_INPUT: &'static Fn() -> Vec<f64> = &|| {
+	let mut rng = rand::thread_rng();
+	[rng.gen::<f64>() * 100.0, rng.gen::<f64>() * 120.0].to_vec()
+};
+
 fn main() {
 
 	let mut rng = rand::thread_rng();
 
     println!("Perceptron");
 
-    let mut perceptron = Neuron::new([rng.gen::<f64>(), rng.gen::<f64>()].to_vec(), rng.gen::<f64>());
-    train::train_perceptron(&mut perceptron, 1000, 0.9, CLASSIFY_FUNCTION, HEAVISIDE);
+    let mut perceptron = Neuron::new(RANDOM_INPUT(), rng.gen::<f64>());
+    train::train_perceptron(&mut perceptron, 1000, 0.9, RANDOM_INPUT, CLASSIFY_FUNCTION, HEAVISIDE);
 
     let mut good_points = Vec::new();
     let mut bad_points = Vec::new();
     let attempts = 500;
 
 	for _ in 0..attempts {
-		let input = [rng.gen::<f64>() * 100.0, rng.gen::<f64>() * 120.0].to_vec();
+		let input = RANDOM_INPUT();
 		if !make_guess(&perceptron, &input) {
 			bad_points.push(input);
 		} else {
