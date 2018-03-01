@@ -1,30 +1,33 @@
 extern crate rand;
-use rand::{ThreadRng, Rng};
+extern crate gnuplot;
+
+use rand::{Rng};
+use gnuplot::{Figure, Caption, Color};
 
 struct Neuron {
-	weights: Vec<f32>,
-	bias: f32
+	weights: Vec<f64>,
+	bias: f64
 
 }
 
 impl Neuron {
-	fn new(weights: Vec<f32>, bias: f32) -> Neuron {
+	fn new(weights: Vec<f64>, bias: f64) -> Neuron {
 		Neuron {
 			weights: weights.clone(),
 			bias: bias
 		}
 	}
 
-	fn step(self: &Neuron, sum: f32) -> f32 {
+	fn step(self: &Neuron, sum: f64) -> f64 {
 		if sum > 0.0 { 1.0 } else { 0.0 }
 	}
 
-	fn process(self: &Neuron, input: Vec<f32>) -> f32 {
+	fn process(self: &Neuron, input: Vec<f64>) -> f64 {
 		let sum = self.bias + input.iter().zip(self.weights.iter()).fold(0.0, |last, (input, weight)| last + (input * weight));
 		self.step(sum)
 	}
 
-	fn adjust(self: &mut Neuron, inputs: Vec<f32>, delta: f32, learn_rate: f32) {
+	fn adjust(self: &mut Neuron, inputs: Vec<f64>, delta: f64, learn_rate: f64) {
 		self.weights = self.weights.iter().zip(inputs.iter()).map(|(weight, input)| weight + (input * delta * learn_rate)).collect();
 		self.bias += delta * learn_rate;
 	}
@@ -34,22 +37,25 @@ impl Neuron {
 	}
 }
 
-fn c1(_x: f32, y: f32) -> f32 {
-	if y > 10.0 { 1.0 } else { 0.0 }
+fn cf(x: f64) -> f64 {
+	1.0 * x + 4.0
 }
 
-fn train(p: &mut Neuron, rounds: usize, factor: f32) {
+fn c1(x: f64, y: f64) -> f64 {
+	if cf(x) > y { 1.0 } else { 0.0 }
+}
+
+fn train(p: &mut Neuron, rounds: usize, factor: f64) {
 	let mut rng = rand::thread_rng();
 	(0..rounds).for_each(|_| {
-		let input = [rng.gen::<f32>() * 100.0, rng.gen::<f32>() * 100.0].to_vec();
+		let input = [rng.gen::<f64>() * 100.0, rng.gen::<f64>() * 100.0].to_vec();
 		let found = p.process(input.clone());
 		let expected = c1(input[0], input[1]);
 		p.adjust(input, expected - found, factor);
 	});
 }
 
-fn make_guess(p: &Neuron, rng: &mut ThreadRng) -> bool {
-	let input = [rng.gen::<f32>() * 100.0, rng.gen::<f32>() * 100.0].to_vec();
+fn make_guess(p: &Neuron, input: &Vec<f64>) -> bool {
 	let found = p.process(input.clone());
 	found == c1(input[0], input[1])
 }
@@ -60,26 +66,47 @@ fn main() {
 
     println!("Perceptron");
 
-    let mut perceptron = Neuron::new([rng.gen::<f32>(), rng.gen::<f32>()].to_vec(), rng.gen::<f32>());
+    let mut perceptron = Neuron::new([rng.gen::<f64>(), rng.gen::<f64>()].to_vec(), rng.gen::<f64>());
     
     println!("Initial Weights (Before Training)");
     perceptron.debug();
 
-    train(&mut perceptron, 1000, 0.05);
+    train(&mut perceptron, 1000, 0.9);
 
     println!("After Training");
     perceptron.debug();
 
     perceptron.process(Vec::new());
 
-    let mut bad = 0;
-    let attempts = 100000;
+    let mut good_points = Vec::new();
+    let mut bad_points = Vec::new();
+    let attempts = 500;
+
+	let mut fg = Figure::new();
 
 	for _ in 0..attempts {
-		if !make_guess(&perceptron, &mut rng) {
-			bad += 1;
+		let input = [rng.gen::<f64>() * 100.0, rng.gen::<f64>() * 100.0].to_vec();
+		if !make_guess(&perceptron, &input) {
+			bad_points.push(input);
+		} else {
+			good_points.push(input);
 		}
 	}
 
-	println!("{} in {} ({}%) fail", bad, attempts, (bad as f32 / attempts as f32) * 100.0)
+	println!("{} in {} ({}%) fail", bad_points.len(), attempts, (bad_points.len() as f64 / attempts as f64) * 100.0);
+
+	let x = [0.0f64, 100.0];
+	let y = [cf(0.0), cf(100.0)];
+
+	fg.axes2d().lines(&x, &y, &[Caption("The dividing line"), Color("black")])
+		.points(
+			&(good_points.iter().map(|ref p| p[0]).collect::<Vec<f64>>()),
+			&(good_points.iter().map(|ref p| p[1]).collect::<Vec<f64>>()),
+			&[Color("green")]
+		).points(
+			&(bad_points.iter().map(|ref p| p[0]).collect::<Vec<f64>>()),
+			&(bad_points.iter().map(|ref p| p[1]).collect::<Vec<f64>>()),
+			&[Color("red")]
+		);
+	fg.show();
 }
