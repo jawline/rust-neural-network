@@ -4,9 +4,11 @@ extern crate gnuplot;
 mod neuron;
 mod train;
 mod plot;
+mod steps;
 
 use neuron::Neuron;
 use rand::Rng;
+use steps::HEAVISIDE;
 
 pub fn cf(x: f64) -> f64 {
 	1.0 * x + 4.0
@@ -17,11 +19,10 @@ pub fn c1(x: f64, y: f64) -> f64 {
 }
 
 fn make_guess(p: &Neuron, input: &Vec<f64>) -> bool {
-	let found = p.process(input.clone(), STEP_FUNCTION);
+	let found = p.process(input.clone(), HEAVISIDE);
 	found == c1(input[0], input[1])
 }
 
-const STEP_FUNCTION: &'static Fn(&Neuron, f64) -> f64 = &|_, v| v;
 const CLASSIFY_FUNCTION: &'static Fn(f64, f64) -> f64 = &|x, y| c1(x, y);
 
 fn main() {
@@ -31,7 +32,7 @@ fn main() {
     println!("Perceptron");
 
     let mut perceptron = Neuron::new([rng.gen::<f64>(), rng.gen::<f64>()].to_vec(), rng.gen::<f64>());
-    train::train_perceptron(&mut perceptron, 1000, 0.9, CLASSIFY_FUNCTION, STEP_FUNCTION);
+    train::train_perceptron(&mut perceptron, 1000, 0.9, CLASSIFY_FUNCTION, HEAVISIDE);
 
     let mut good_points = Vec::new();
     let mut bad_points = Vec::new();
