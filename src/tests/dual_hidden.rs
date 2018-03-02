@@ -6,7 +6,7 @@ use rand;
 use rand::Rng;
 
 use train;
-use steps::{TRANSFER};
+use steps::{TRANSFER, TRANSFER_DERIVITIVE};
 use plot;
 
 fn distance((c_x, c_y): (f64, f64), (p_x, p_y): (f64, f64)) -> f64 {
@@ -32,7 +32,7 @@ fn do_dual() {
     let layer2 = Layer::new(&[random_neuron(2)]);
     let mut network = Network::new(&[layer1, layer2]);
 
-    train::train_network(&mut network, 1000, 0.4, RANDOM_INPUT, CLASSIFY_FUNCTION, TRANSFER);
+    train::train_network(&mut network, 1000, 0.4, RANDOM_INPUT, CLASSIFY_FUNCTION, TRANSFER, TRANSFER_DERIVITIVE);
 
     let mut good_points = Vec::new();
     let mut bad_points = Vec::new();

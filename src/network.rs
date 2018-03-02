@@ -38,11 +38,8 @@ impl Network {
 		})[0]
 	}
 
-	fn trans_deriv(output: f64) -> f64 {
-		output * (1.0 - output)
-	}
-
-	pub fn adjust(self: &mut Network, delta: f64, learn_rate: f64) {
+	pub fn adjust<F>(self: &mut Network, delta: f64, learn_rate: f64, transfer_derivitive: F)
+	where F: Copy + Fn(f64) -> f64 {
 
 		let mut last_deltas = Vec::new();
 
@@ -72,7 +69,7 @@ impl Network {
 				.neurons
 				.iter()
 				.enumerate()
-				.map(|(i, neuron)| errors[i] * Network::trans_deriv(neuron.output))
+				.map(|(i, neuron)| errors[i] *transfer_derivitive(neuron.output))
 				.collect();
 
 			self.layers[cur_layer].neurons
