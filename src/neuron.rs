@@ -3,6 +3,7 @@ pub struct Neuron {
 	pub weights: Vec<f64>,
 	pub bias: f64,
 	pub output: f64,
+	pub delta: f64,
 	pub inputs: Vec<f64>
 }
 
@@ -10,14 +11,15 @@ impl Neuron {
 
 	pub fn new(weights: Vec<f64>, bias: f64) -> Neuron {
 		Neuron {
-			weights: weights.clone(),
+			weights: weights,
 			bias: bias,
 			output: 0.0,
+			delta: 0.0,
 			inputs: Vec::new()
 		}
 	}
 
-	pub fn process<F>(self: &mut Neuron, input: &Vec<f64>, step: F) -> f64
+	pub fn activate<F>(self: &mut Neuron, input: &Vec<f64>, step: F) -> f64
 		where F: Fn(&Neuron, f64) -> f64 {
 
 		let sum = self.bias + input.iter()

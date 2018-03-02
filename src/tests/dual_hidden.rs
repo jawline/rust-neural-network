@@ -15,7 +15,7 @@ fn distance((c_x, c_y): (f64, f64), (p_x, p_y): (f64, f64)) -> f64 {
 
 fn c1(x: f64, y: f64) -> f64 {
 	let is_close = distance((30.0, 40.0), (x, y)) < 10.0;
-	if is_close { 1.0 } else { 0.0 }
+	if is_close { 0.9 } else { 0.1 }
 }
 
 const RANDOM_INPUT: &'static Fn() -> Vec<f64> = &|| {
@@ -30,9 +30,9 @@ fn do_dual() {
 
     let layer1 = Layer::new(&[random_neuron(2), random_neuron(2)]);
     let layer2 = Layer::new(&[random_neuron(2)]);
-    let mut network = Network::new(&[layer1, layer2]);
+    let mut network = Network::new(&[layer2]);
 
-    train::train_network(&mut network, 1000, 0.4, RANDOM_INPUT, CLASSIFY_FUNCTION, TRANSFER, TRANSFER_DERIVITIVE);
+    train::train_network(&mut network, 10000, 0.6, RANDOM_INPUT, CLASSIFY_FUNCTION, TRANSFER, TRANSFER_DERIVITIVE);
 
     let mut good_points = Vec::new();
     let mut bad_points = Vec::new();
@@ -40,7 +40,7 @@ fn do_dual() {
 
 	for _ in 0..attempts {
 		let input = RANDOM_INPUT();
-		println!("{} {}", network.process(&input, TRANSFER), c1(input[0], input[1]));
+		println!("{} {}", c1(input[0], input[1]), network.process(&input, TRANSFER));
 		if c1(input[0], input[1]) == network.process(&input, TRANSFER) {
 			&mut good_points
 		} else {

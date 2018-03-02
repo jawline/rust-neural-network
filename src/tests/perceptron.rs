@@ -34,7 +34,7 @@ fn do_perceptron() {
 
 	for _ in 0..attempts {
 		let input = RANDOM_INPUT();
-		if perceptron.process(&input, HEAVISIDE) == c1(input[0], input[1]) {
+		if perceptron.activate(&input, HEAVISIDE) == c1(input[0], input[1]) {
 			&mut good_points
 		} else {
 			&mut bad_points
