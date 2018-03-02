@@ -2,40 +2,21 @@ use neuron::Neuron;
 
 #[derive(Clone)]
 pub struct Layer {
-	neurons: Vec<Neuron>,
-	links: Vec<(usize, usize)>
+	neurons: Vec<Neuron>
 }
 
 impl Layer {
-	pub fn new(neurons: &[Neuron], links: &[(usize, usize)]) -> Layer {
+	pub fn new(neurons: &[Neuron]) -> Layer {
 		Layer {
-			neurons: neurons.to_vec(),
-			links: links.to_vec()
+			neurons: neurons.to_vec()
 		}
 	}
 
-	pub fn add(self: &mut Layer, n: Neuron) {
-		self.neurons.push(n);
-	}
-
-	pub fn link(self: &mut Layer, from: usize, to: usize) {
-		self.links.push((from, to));
-	}
-
-	pub fn do_layer<F>(self: &mut Layer, inputs: &Vec<f64>, links: &Vec<(usize, usize)>, step: F) -> Vec<f64> 
+	pub fn forward<F>(self: &mut Layer, inputs: &Vec<f64>, step: F) -> Vec<f64> 
 	where F: Copy + Fn(&Neuron, f64) -> f64 {
-		let mut results = Vec::new();
-
-		for i in 0..self.neurons.len() {
-			let target_inputs: Vec<f64> = links.iter()
-				.filter(|&&(_, y)| y == i)
-				.map(|&(x, _)| x)
-				.map(|x| inputs[x])
-				.collect();
-			results.push(self.neurons[i].process(target_inputs, step));
-		}
-		
-		results
+		self.neurons.iter_mut().map(|ref mut neuron| {
+			neuron.process(&inputs, step)
+		}).collect()
 	}
 }
 
@@ -50,21 +31,11 @@ impl Network {
 		}
 	}
 
-	pub fn add(self: &mut Network, layer: Layer) {
-		self.layers.push(layer);
-	}
-
-	pub fn process<F>(self: &mut Network, inputs: Vec<f64>, initial_links: Vec<(usize, usize)>, step: F) -> f64
+	pub fn process<F>(self: &mut Network, inputs: &Vec<f64>, step: F) -> f64
 	where F: Copy + Fn(&Neuron, f64) -> f64 {
-		let mut current_inputs = inputs.clone();
-		let mut current_links = initial_links.clone();
-
-		for i in 0..self.layers.len() {
-			current_inputs = self.layers[i].do_layer(&current_inputs, &current_links, step);
-			current_links = self.layers[i].links.clone();
-		}
-
-		current_inputs[0]
+		self.layers.iter_mut().fold(inputs.clone(), |next_inputs, layer| {
+			layer.forward(&next_inputs, step)
+		})[0]
 	}
 
 	fn trans_deriv(output: f64) -> f64 {
@@ -83,20 +54,14 @@ impl Network {
 				errors.push(delta)
 			} else {
 				let layer = &self.layers[cur_layer];
+				let last_layer = &self.layers[cur_layer + 1];
 				for neuron_idx in 0..layer.neurons.len() {
 
-					let neuron = &layer.neurons[neuron_idx];
-
-					let links = layer
-									.links
-									.iter()
-									.filter(|&&(from, _)| from == neuron_idx)
-									.map(|&(_, x)| x);
-				
-					let error = links
+					let error = last_layer.neurons
+							.iter()
 							.enumerate()
-							.fold(0.0, |last, (link_id, next_idx)| {
-								last + (neuron.weights[link_id] * last_deltas[next_idx])
+							.fold(0.0, |last, (idx, neuron)| {
+								last + (neuron.weights[neuron_idx] * last_deltas[idx])
 							});
 
 					errors.push(error);
