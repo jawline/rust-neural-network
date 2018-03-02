@@ -9,13 +9,12 @@ use train;
 use steps::{TRANSFER, TRANSFER_DERIVITIVE};
 use plot;
 
-fn distance((c_x, c_y): (f64, f64), (p_x, p_y): (f64, f64)) -> f64 {
-	((c_x - p_x).powi(2) + (c_y - p_y).powi(2)).sqrt()
+fn cf(x: f64) -> f64 {
+	1.0 * x + 4.0
 }
 
 fn c1(x: f64, y: f64) -> f64 {
-	let is_close = distance((30.0, 40.0), (x, y)) < 10.0;
-	if is_close { 0.9 } else { 0.1 }
+	if cf(x) > y { 1.0 } else { 0.0 }
 }
 
 const RANDOM_INPUT: &'static Fn() -> Vec<f64> = &|| {
@@ -32,7 +31,7 @@ fn do_dual() {
     let layer2 = Layer::new(&[random_neuron(2)]);
     let mut network = Network::new(&[layer2]);
 
-    train::train_network(&mut network, 10000, 0.6, RANDOM_INPUT, CLASSIFY_FUNCTION, TRANSFER, TRANSFER_DERIVITIVE);
+    train::train_network(&mut network, 100, 0.1, RANDOM_INPUT, CLASSIFY_FUNCTION, TRANSFER, TRANSFER_DERIVITIVE);
 
     let mut good_points = Vec::new();
     let mut bad_points = Vec::new();
@@ -51,6 +50,6 @@ fn do_dual() {
 	println!("{} in {} ({}%) fail", bad_points.len(), attempts, (bad_points.len() as f64 / attempts as f64) * 100.0);
 
 	let percentage_failed = bad_points.len() as f64 / attempts as f64;
-	plot::plot("Dual", 100.0, 0.0, 100.0, good_points, bad_points);
+	//plot::plot2("Dual", good_points, bad_points);
 	assert!(percentage_failed < 0.25);
 }

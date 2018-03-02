@@ -33,9 +33,8 @@ pub fn train_network<F, K, R, L>(p: &mut Network, rounds: usize, factor: f64, ne
 		let mut sum_error = 0.0;
 		for &(ref input, ref expected) in &training_data {
 			let found = p.process(input, step);
-			p.adjust(expected - found, factor, step_deriv);
+			p.backpropogate(expected - found, factor, step_deriv);
 			sum_error += expected - found;
 		}
-		println!("Done round, error {}", sum_error);
 	}
 }
