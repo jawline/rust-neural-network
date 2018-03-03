@@ -1,9 +1,11 @@
+use rand;
+use rand::Rng;
+
 #[derive(Clone)]
 pub struct Neuron {
 	pub weights: Vec<f64>,
 	pub bias: f64,
 	pub output: f64,
-	pub delta: f64,
 	pub inputs: Vec<f64>
 }
 
@@ -14,7 +16,6 @@ impl Neuron {
 			weights: weights,
 			bias: bias,
 			output: 0.0,
-			delta: 0.0,
 			inputs: Vec::new()
 		}
 	}
@@ -37,5 +38,10 @@ impl Neuron {
 			.zip(self.inputs.iter())
 			.map(|(weight, input)| weight + (input * delta * learn_rate)).collect();
 		self.bias += delta * learn_rate;
+	}
+
+	pub fn random(num_inputs: usize) -> Neuron {
+		let mut rng = rand::thread_rng();
+		Neuron::new((0..num_inputs).map(|_| rng.gen::<f64>()).collect(), rng.gen::<f64>())
 	}
 }

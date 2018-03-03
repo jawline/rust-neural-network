@@ -1,3 +1,4 @@
 mod env;
 mod perceptron;
-mod dual_hidden;
+mod network_line;
+mod network_circle;

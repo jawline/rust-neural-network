@@ -1,4 +1,3 @@
-use network::{Layer, Network};
 use tests::env::random_neuron;
 
 use train;
@@ -6,7 +5,6 @@ use steps::{HEAVISIDE};
 
 use rand;
 use rand::Rng;
-use plot;
 
 fn cf(x: f64) -> f64 {
 	1.0 * x + 4.0

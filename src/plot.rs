@@ -27,13 +27,17 @@ pub fn plot(title: &str, maxx: f64, miny: f64, maxy: f64, good_points: Vec<Vec<f
 	fg.show();
 }
 
-pub fn plot2(title: &str, good_points: Vec<Vec<f64>>, bad_points: Vec<Vec<f64>>) {
+pub fn plot2(title: &str, guide_points: Vec<Vec<f64>>, good_points: Vec<Vec<f64>>, bad_points: Vec<Vec<f64>>) {
 
 	let mut fg = Figure::new();
 
 	fg.axes2d()
 		.set_title(title, &[])
 		.points(
+			&(extract(&guide_points, 0)),
+			&(extract(&guide_points, 1)),
+			&[Color("blue")]
+		).points(
 			&(extract(&good_points, 0)),
 			&(extract(&good_points, 1)),
 			&[Color("green")]
