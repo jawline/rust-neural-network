@@ -23,6 +23,7 @@ impl Layer {
 			neuron.activate(&inputs, step)
 		}).collect()
 	}
+
 }
 
 pub struct Network {
@@ -100,28 +101,22 @@ impl Network {
 			});
 	}
 
-	fn next_layer(layers: &mut Vec<Layer>, program_inputs: usize, size: usize) {
-		
-		let layer_inputs = if layers.len() == 0 {
-			program_inputs
-		} else {
-			layers[layers.len() - 1].len()
-		};
+	fn build_layer(program_inputs: usize, size: usize, last_size: &mut usize) -> Layer {
 
-		let items: Vec<Neuron> = (0..size).map(|_| Neuron::random(layer_inputs)).collect();
+		let items: Vec<Neuron> = (0..size).map(|_| {
+			Neuron::random(program_inputs)
+		}).collect();
 
-		layers.push(Layer::new(
-			&items
-		))
+		*last_size = size;
+
+		Layer::new(&items)
 	}
 
 	pub fn build(inputs: usize, layer_sizes: &[usize]) -> Network {
-		let mut layers = Vec::new();
-		
-		layer_sizes.iter().for_each(|size| {
-			Network::next_layer(&mut layers, inputs, *size);
-		});
+		let mut last_size = inputs;
 
-		Network::new(layers)
+		Network::new(layer_sizes.iter().map(|size| {
+			Network::build_layer(last_size, *size, &mut last_size)
+		}).collect())
 	}
 }
