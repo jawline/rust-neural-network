@@ -1,5 +1,6 @@
 extern crate rand;
 extern crate gnuplot;
+extern crate rust_graph;
 
 mod neuron;
 mod train;

@@ -6,7 +6,6 @@ pub struct Layer {
 }
 
 impl Layer {
-
 	pub fn new(neurons: &[Neuron]) -> Layer {
 		Layer {
 			neurons: neurons.to_vec()
@@ -24,6 +23,15 @@ impl Layer {
 		}).collect()
 	}
 
+	pub fn transfer_errors<F>(self: &mut Layer, errors: &Vec<f64>, transfer_derivitive: F) -> Vec<f64>
+	where F: Copy + Fn(f64) -> f64 {
+		self.neurons
+			.iter_mut()
+			.enumerate()
+			.map(|(i, ref mut neuron)| {
+				errors[i] * transfer_derivitive(neuron.output)
+			}).collect()
+	}
 }
 
 pub struct Network {
@@ -44,41 +52,37 @@ impl Network {
 		})
 	}
 
+	fn layer_weighted_error(self: &Network, last_deltas: &Vec<f64>, cur_layer: usize) -> Vec<f64> {
+		//The final layer just uses the delta
+		if cur_layer == self.layers.len() - 1 {
+			last_deltas.to_vec()
+		} else {
+			let neuron_count = *&self.layers[cur_layer].neurons.len();
+			(0..neuron_count).map(|neuron_idx| {
+				//Find the weighted error of every output that uses this neuron as an input
+				*(&self.layers[cur_layer + 1]
+						.neurons
+						.iter()
+						.enumerate()
+						.fold(0.0, |last, (i, neuron)| {
+							last + (neuron.weights[neuron_idx] * last_deltas[i])
+						}))
+			}).collect()
+		}
+	}
+
 	pub fn backpropogate<F>(self: &mut Network, delta: Vec<f64>, transfer_derivitive: F) -> Vec<Vec<f64>>
 	where F: Copy + Fn(f64) -> f64 {
 
-		let mut last_deltas = Vec::new();
+		let mut last_deltas = delta;
 
 		let layer_deltas: Vec<Vec<f64>> = 
 			(0..self.layers.len()).rev().map(|cur_layer| {
 
-				//The final layer just uses the delta
-				let errors = if cur_layer == self.layers.len() - 1 {
-					delta.to_vec()
-				} else {
-					let neuron_count = *&self.layers[cur_layer].neurons.len();
-
-					(0..neuron_count).map(|neuron_idx| {
-						//Find the weighted error of every output that uses this neuron as an input
-						*(&self.layers[cur_layer + 1]
-								.neurons
-								.iter()
-								.enumerate()
-								.fold(0.0, |last, (i, neuron)| {
-									last + (neuron.weights[neuron_idx] * last_deltas[i])
-								}))
-					}).collect()
-				};
+				let errors = self.layer_weighted_error(&last_deltas, cur_layer);
 
 				//Update the deltas
-				last_deltas = self.layers[cur_layer]
-					.neurons
-					.iter_mut()
-					.enumerate()
-					.map(|(i, ref mut neuron)| {
-						errors[i] * transfer_derivitive(neuron.output)
-					})
-					.collect();
+				last_deltas = self.layers[cur_layer].transfer_errors(&errors, transfer_derivitive);
 
 				last_deltas.clone()
 			}).collect();
