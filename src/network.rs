@@ -53,21 +53,26 @@ impl Network {
 	}
 
 	fn layer_weighted_error(self: &Network, last_deltas: &Vec<f64>, cur_layer: usize) -> Vec<f64> {
-		//The final layer just uses the delta
-		if cur_layer == self.layers.len() - 1 {
-			last_deltas.to_vec()
-		} else {
+		
+		let last_layer = cur_layer == self.layers.len() - 1;
+		
+		fn hidden_layer_error() -> Vec<f64> {
 			let neuron_count = *&self.layers[cur_layer].neurons.len();
 			(0..neuron_count).map(|neuron_idx| {
 				//Find the weighted error of every output that uses this neuron as an input
 				*(&self.layers[cur_layer + 1]
-						.neurons
-						.iter()
-						.enumerate()
-						.fold(0.0, |last, (i, neuron)| {
-							last + (neuron.weights[neuron_idx] * last_deltas[i])
-						}))
+					.neurons
+					.iter()
+					.enumerate()
+					.fold(0.0, |last, (i, neuron)| {
+						last + (neuron.weights[neuron_idx] * last_deltas[i])
+					}))
 			}).collect()
+		}
+		
+		match last_layer {
+			true => last_deltas.to_vec(),
+			false => hidden_layer_error()
 		}
 	}
 
