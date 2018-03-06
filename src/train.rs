@@ -18,9 +18,12 @@ pub fn train_network<Stepper, Classifier, StepDerivitive, ExitTest>(p: &mut Netw
 	where     Stepper: Copy + Fn(&Neuron, f64) -> f64,
 		  StepDerivitive: Copy + Fn(f64) -> f64,
 		  Classifier: Copy + Fn(f64, f64) -> Vec<f64>,
-		  ExitTest: Copy + Fn(usize, f64) -> bool {
-
-	for round in 0..rounds {
+		  ExitTest: Copy + Fn(usize, Vec<f64>) -> bool {
+			  
+	let mut round_errors: Vec<f64> = Vec::new();
+	let mut rounds = 0;
+			  
+	while !ExitTest(rounds, round_errors) {
 
 		let mut sum_error: f64 = 0.0;
 		let mut epoch_delta: Vec<f64> = Vec::new();
@@ -45,5 +48,8 @@ pub fn train_network<Stepper, Classifier, StepDerivitive, ExitTest>(p: &mut Netw
 		}
 
 		println!("round={} error={} rate={}", round, sum_error, learn_rate);
+		
+		round_errors.push(sum_error);
+		rounds += 1;
 	}
 }
