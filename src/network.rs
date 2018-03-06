@@ -85,26 +85,21 @@ impl Network {
 	pub fn adjust_weights(self: &mut Network, layer_deltas: &Vec<Vec<f64>>, learn_rate: f64) {
 		//Adjust each neuron
 		self.layers
-			.iter_mut()
-			.zip(layer_deltas.iter().rev())
-			.for_each(|(ref mut layer, ref layer_deltas)| {
-				layer.neurons
-					.iter_mut()
-					.zip(layer_deltas.iter())
-					.for_each(|(ref mut neuron, ref delta)| {
-							neuron.adjust(**delta, learn_rate);
-					});
-			});
+		    .iter_mut()
+		    .zip(layer_deltas.iter().rev())
+		    .for_each(|(ref mut layer, ref layer_deltas)| {
+		    	layer.neurons
+			     .iter_mut()
+			     .zip(layer_deltas.iter())
+			     .for_each(|(ref mut neuron, ref delta)| {
+				neuron.adjust(**delta, learn_rate);
+			     });
+		    });
 	}
 
 	fn build_layer(program_inputs: usize, size: usize, last_size: &mut usize) -> Layer {
-
-		let items: Vec<Neuron> = (0..size).map(|_| {
-			Neuron::random(program_inputs)
-		}).collect();
-
+		let items: Vec<Neuron> = (0..size).map(|_| Neuron::random(program_inputs)).collect();
 		*last_size = size;
-
 		Layer::new(&items)
 	}
 
