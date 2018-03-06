@@ -36,7 +36,7 @@ impl Neuron {
 		self.weights = self.weights
 			.iter()
 			.zip(self.inputs.iter())
-			.map(|(weight, input)| weight + (input * delta * learn_rate)).collect();
+			.map(|(weight, input)| weight + delta * learn_rate * input).collect();
 		self.bias += delta * learn_rate;
 	}
 
