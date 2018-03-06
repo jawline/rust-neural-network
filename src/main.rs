@@ -17,7 +17,4 @@ mod tests;
 use data::{ write_data, load_data };
 use circle::gen_even_set;
 
-fn main() {
-
-	write_data("./weighted.csv", &gen_even_set(5000));
-}
+fn main() {}
