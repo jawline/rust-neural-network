@@ -7,9 +7,7 @@ pub struct Layer {
 
 impl Layer {
 	pub fn new(neurons: &[Neuron]) -> Layer {
-		Layer {
-			neurons: neurons.to_vec()
-		}
+		Layer { neurons: neurons.to_vec() }
 	}
 
 	pub fn len(self: &Layer) -> usize {
