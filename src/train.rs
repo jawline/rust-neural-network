@@ -26,7 +26,7 @@ pub fn train_network<Stepper, Classifier, StepDerivitive, ExitTest>(p: &mut Netw
 	while !ExitTest(rounds, round_errors) {
 
 		let mut sum_error: f64 = 0.0;
-		let mut epoch_delta: Vec<f64> = Vec::new();
+		let mut epoch_delta = None;
 		
 		for input in training_set {
 			let expected = classifier(input[0], input[1]);
@@ -39,7 +39,10 @@ pub fn train_network<Stepper, Classifier, StepDerivitive, ExitTest>(p: &mut Netw
 			if !apply_epoch {
 				p.adjust_weights(&deltas, learn_rate);
 			} else {
-				epoch_delta = epoch_deltas.iter().zip(deltas.iter()).map(|(last, next)| last + next);
+				epoch_delta = Some(match epoch_delta {
+					Some(epoch_delta) => epoch_delta.iter().zip(deltas.iter()).map(|(last, next)| last + next),
+					None => deltas
+				});
 			}
 		}
 		
