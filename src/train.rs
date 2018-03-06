@@ -13,11 +13,12 @@ pub fn train_perceptron<F, K, R>(p: &mut Neuron, rounds: usize, factor: f64, nex
 	}
 }
 
-pub fn train_network<Stepper, Classifier, StepDerivitive>(p: &mut Network, rounds: usize, factor: f64, training_set: &[Vec<f64>],
-			      apply_epoch: bool, classifier: Classifier, step: Stepper, step_deriv: L) 
+pub fn train_network<Stepper, Classifier, StepDerivitive, ExitTest>(p: &mut Network, rounds: usize, factor: f64, training_set: &[Vec<f64>],
+			      apply_epoch: bool, exit_test: ExitTest, classifier: Classifier, step: Stepper, step_deriv: StepDerivitive) 
 	where     Stepper: Copy + Fn(&Neuron, f64) -> f64,
 		  StepDerivitive: Copy + Fn(f64) -> f64,
-		  Classifier: Copy + Fn(f64, f64) -> Vec<f64> {
+		  Classifier: Copy + Fn(f64, f64) -> Vec<f64>,
+		  ExitTest: Copy + Fn(usize, f64) -> bool {
 
 	for round in 0..rounds {
 
