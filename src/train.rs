@@ -46,7 +46,7 @@ pub fn train_network<Stepper, Classifier, StepDerivitive, ExitTest>(p: &mut Netw
 			}
 		}
 		
-		if apply_epoch {
+		if apply_epoch && epoch_delta.is_some() {
 			p.adjust_weights(epoch_delta);
 		}
 
