@@ -1,5 +1,10 @@
 use neuron::Neuron;
 
+pub trait StepFn {
+  fn transfer(&Neuron, f64) -> f64,
+  fn derive(&Neuron, f64) -> f64
+};
+
 pub const HEAVISIDE : &'static Fn(&Neuron, f64) -> f64 = &|_, v| if v > 0.0 { 1.0 } else { 0.0 };
 pub const HEAVISIDE_DERIVITIVE : &'static Fn(&Neuron, f64) -> f64 = &|_, v| if v > 0.0 { 1.0 } else { 0.0 };
 
