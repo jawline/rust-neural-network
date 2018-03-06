@@ -24,11 +24,11 @@ impl Layer {
 	pub fn transfer_errors<F>(self: &mut Layer, errors: &Vec<f64>, transfer_derivitive: F) -> Vec<f64>
 	where F: Copy + Fn(f64) -> f64 {
 		self.neurons
-			.iter_mut()
-			.enumerate()
-			.map(|(i, ref mut neuron)| {
-				errors[i] * transfer_derivitive(neuron.output)
-			}).collect()
+		    .iter_mut()
+		    .enumerate()
+		    .map(|(i, ref mut neuron)| {
+			errors[i] * transfer_derivitive(neuron.output)
+		    }).collect()
 	}
 }
 
@@ -38,9 +38,7 @@ pub struct Network {
 
 impl Network {
 	pub fn new(layers: Vec<Layer>) -> Network {
-		Network {
-			layers: layers
-		}
+		Network { layers: layers }
 	}
 
 	pub fn process<F>(self: &mut Network, inputs: &Vec<f64>, step: F) -> Vec<f64>
@@ -76,21 +74,12 @@ impl Network {
 
 	pub fn backpropogate<F>(self: &mut Network, delta: Vec<f64>, transfer_derivitive: F) -> Vec<Vec<f64>>
 	where F: Copy + Fn(f64) -> f64 {
-
 		let mut last_deltas = delta;
-
-		let layer_deltas: Vec<Vec<f64>> = 
-			(0..self.layers.len()).rev().map(|cur_layer| {
-
-				let errors = self.layer_weighted_error(&last_deltas, cur_layer);
-
-				//Update the deltas
-				last_deltas = self.layers[cur_layer].transfer_errors(&errors, transfer_derivitive);
-
-				last_deltas.clone()
-			}).collect();
-
-		layer_deltas
+		(0..self.layers.len()).rev().map(|cur_layer| {
+			let error_ratios = self.layer_weighted_error(&last_deltas, cur_layer);
+			last_deltas = self.layers[cur_layer].transfer_errors(&error_ratios, transfer_derivitive);
+			last_deltas.clone()
+		}).collect()
 	}
 
 	pub fn adjust_weights(self: &mut Network, layer_deltas: &Vec<Vec<f64>>, learn_rate: f64) {
