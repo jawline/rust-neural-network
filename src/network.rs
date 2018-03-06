@@ -29,7 +29,7 @@ impl Layer {
 			.iter_mut()
 			.enumerate()
 			.map(|(i, ref mut neuron)| {
-				errors[i] * transfer_derivitive(neuron.output)
+				errors[i] //* transfer_derivitive(neuron.output)
 			}).collect()
 	}
 }

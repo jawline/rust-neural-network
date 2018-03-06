@@ -6,4 +6,5 @@ authors = ["Blake Loring <blake@parsed.uk>"]
 [dependencies]
 rand = "0.4"
 gnuplot = "*"
+csv = "*"
 rust_graph = { git = 'https://github.com/jawline/rust-graph.git' }

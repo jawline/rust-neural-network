@@ -1,5 +1,4 @@
 use rust_graph::Graph;
-use gnuplot::{Figure, Caption, Color, AxesCommon};
 
 fn extract(points: &Vec<Vec<f64>>) -> Vec<(f64, f64)> {
 	points.iter().map(|v| (v[0], v[1])).collect()

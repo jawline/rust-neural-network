@@ -24,7 +24,16 @@ const CLASSIFY_FUNCTION: &'static Fn(f64, f64) -> Vec<f64> = &|x, y| [c1(x, y)].
 fn network_line() {
 
     let mut network = Network::build(2, &[4, 1]);
-    train::train_network(&mut network, 10, 10000, 0.1, RANDOM_INPUT, CLASSIFY_FUNCTION, TRANSFER, TRANSFER_DERIVITIVE);
+
+    let training_sample: Vec<Vec<f64>> = (0..10000).map(|_| RANDOM_INPUT()).collect();
+
+    train::train_network(&mut network,
+    	10,
+    	0.1,
+    	&training_sample,
+    	CLASSIFY_FUNCTION,
+    	TRANSFER,
+    	TRANSFER_DERIVITIVE);
 
     let mut good_points = Vec::new();
     let mut bad_points = Vec::new();

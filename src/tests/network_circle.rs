@@ -6,6 +6,7 @@ use network::Network;
 use train;
 use steps::{TRANSFER, TRANSFER_DERIVITIVE};
 use plot;
+use circle::gen_even_set;
 
 fn dist((px, py): (f64, f64), (zx, zy): (f64, f64)) -> f64 {
 	((px - zx).powi(2) + (py - zy).powi(2)).sqrt()
@@ -42,9 +43,15 @@ fn gen_guide_points() -> Vec<Vec<f64>> {
 #[test]
 fn network_circle() {
 
-    let mut network = Network::build(2, &[4, 2]);
+    let mut network = Network::build(2, &[2]);
 
-    train::train_network(&mut network, 100, 5000, 0.09, RANDOM_INPUT, CLASSIFY_FUNCTION, TRANSFER, TRANSFER_DERIVITIVE);
+    train::train_network(&mut network,
+    	30,
+    	0.1,
+    	&gen_even_set(100000), 
+    	CLASSIFY_FUNCTION,
+    	TRANSFER,
+    	TRANSFER_DERIVITIVE);
 
     let mut good_points = Vec::new();
     let mut bad_points = Vec::new();
