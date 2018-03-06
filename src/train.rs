@@ -13,12 +13,11 @@ pub fn train_perceptron<F, K, R>(p: &mut Neuron, rounds: usize, factor: f64, nex
 	}
 }
 
-pub fn train_network<F, K, L>(p: &mut Network, rounds: usize, factor: f64, training_set: &[Vec<f64>], apply_epoch: bool, classifier: K, step: F, step_deriv: L) 
+pub fn train_network<F, K, L>(p: &mut Network, rounds: usize, factor: f64, training_set: &[Vec<f64>],
+			      apply_epoch: bool, classifier: K, step: F, step_deriv: L) 
 	where F: Copy + Fn(&Neuron, f64) -> f64,
 		  K: Copy + Fn(f64, f64) -> Vec<f64>,
 		  L: Copy + Fn(f64) -> f64 {
-
-	let learn_rate = factor;
 
 	for round in 0..rounds {
 
