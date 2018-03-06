@@ -2,7 +2,7 @@ use neuron::Neuron;
 use network::Network;
 
 pub fn train_perceptron<F, K, R>(p: &mut Neuron, rounds: usize, factor: f64, next_input: R, classifier: K, step: F) 
-	where F: Copy + Fn(&Neuron, f64) -> f64,
+	where     F: Copy + Fn(&Neuron, f64) -> f64,
 		  K: Copy + Fn(f64, f64) -> f64,
 		  R: Copy + Fn() -> Vec<f64> {
 	for _ in 0..rounds {
@@ -13,11 +13,11 @@ pub fn train_perceptron<F, K, R>(p: &mut Neuron, rounds: usize, factor: f64, nex
 	}
 }
 
-pub fn train_network<F, K, L>(p: &mut Network, rounds: usize, factor: f64, training_set: &[Vec<f64>],
-			      apply_epoch: bool, classifier: K, step: F, step_deriv: L) 
-	where F: Copy + Fn(&Neuron, f64) -> f64,
-		  K: Copy + Fn(f64, f64) -> Vec<f64>,
-		  L: Copy + Fn(f64) -> f64 {
+pub fn train_network<Stepper, Classifier, StepDerivitive>(p: &mut Network, rounds: usize, factor: f64, training_set: &[Vec<f64>],
+			      apply_epoch: bool, classifier: Classifier, step: Stepper, step_deriv: L) 
+	where     Stepper: Copy + Fn(&Neuron, f64) -> f64,
+		  StepDerivitive: Copy + Fn(f64) -> f64,
+		  Classifier: Copy + Fn(f64, f64) -> Vec<f64> {
 
 	for round in 0..rounds {
 
