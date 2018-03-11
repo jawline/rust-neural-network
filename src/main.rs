@@ -15,7 +15,7 @@ mod tests;
 
 use rand::Rng;
 use network::Network;
-use steps::{Sigmoid, ReLU, Heaviside};
+use steps::ReLU;
 use data::{NormalRange, NormalizedSet};
 
 pub fn dist((px, py): (f64, f64), (zx, zy): (f64, f64)) -> f64 {
@@ -50,32 +50,35 @@ pub fn gen_guide_points(range: &NormalRange) -> Vec<Vec<f64>> {
 	points
 }
 
+fn unmap(p: &[Vec<f64>], range: &NormalRange) -> Vec<Vec<f64>> {
+	p.iter().map(|i| range.reverse(i)).collect()
+}
+
 fn main() {
 
     let mut network = Network::build(2, &[3, 2]);
 
-    let step_fn = ReLU { scalar: 0.01 };
-    let points: Vec<Vec<f64>> = (0..5000).map(|_| RANDOM_INPUT()).collect();
+    let step_fn = ReLU { scalar: 0.0 };
+    let data_range = NormalRange::new(&[0.0, 0.0], &[100.0, 100.0]);
+    let points: Vec<Vec<f64>> = (0..3000).map(|_| RANDOM_INPUT()).collect();
 
     let training_set = NormalizedSet::with_bounds(
     	&points,
-    	&[0.0, 0.0],
-    	&[100.0, 100.0]
+    	data_range.clone()
     );
 
     let points: Vec<Vec<f64>> = (0..500).map(|_| RANDOM_INPUT()).collect();
 
     let active_set = NormalizedSet::with_bounds(
     	&points,
-    	&[0.0, 0.0],
-    	&[100.0, 100.0]
+    	data_range.clone()
     );
 
     train::train_network(&mut network,
-    	0.01,
+    	0.075,
     	&training_set.data, 
     	false,
-    	|a, _| a < 100,
+    	|a, err| a == 0 || (a < 500 && err > 200.0),
     	CLASSIFY_FUNCTION,
     	&step_fn);
 
@@ -97,6 +100,9 @@ fn main() {
 	}
 
 	let percentage_failed = bad_points.len() as f64 / active_set.data.len() as f64;
-	plot::plot2("Dual", gen_guide_points(&training_set.range), good_points, bad_points);
-	assert!(percentage_failed < 0.10);
+
+	println!("Percentage Failed: {}", percentage_failed * 100.0);
+
+	plot::plot2("Dual", unmap(&gen_guide_points(&training_set.range), &data_range), unmap(&good_points, &data_range), unmap(&bad_points, &data_range));
+	assert!(percentage_failed < 0.20);
 }

@@ -7,6 +7,7 @@ pub trait StepFn {
 
 pub struct Heaviside {}
 pub struct Sigmoid {}
+pub struct Tanh {}
 
 pub struct ReLU {
 	pub scalar: f64
@@ -20,6 +21,11 @@ impl StepFn for Heaviside {
 impl StepFn for Sigmoid {
   fn transfer(&self, n:&Neuron, v:f64) -> f64 { 1.0 / (1.0 + -v.exp()) }
   fn derive(&self, n:&Neuron, v:f64) -> f64 { v * (1.0 - v) }
+}
+
+impl StepFn for Tanh {
+  fn transfer(&self, n:&Neuron, v:f64) -> f64 { v.tanh() }
+  fn derive(&self, n:&Neuron, v:f64) -> f64 { 1.0 - v.tanh().powi(2) }
 }
 
 impl StepFn for ReLU {
