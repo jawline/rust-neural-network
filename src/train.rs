@@ -45,7 +45,7 @@ pub fn train_network<F: StepFn, Classifier, ExitTest>(p: &mut Network, learn_rat
 			println!("TODO: Apply epoch mode");
 		}
 
-		if (sum_error >= prev_error) {
+		if sum_error >= prev_error {
 			learn_rate -= 0.001;
 			if learn_rate < 0.0001 {
 				learn_rate = 0.0001;

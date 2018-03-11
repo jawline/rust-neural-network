@@ -1,38 +1,36 @@
 use rand;
-use rand::Rng;
-
-use network::Network;
-
 use train;
-use steps::{Sigmoid, ReLU, Heaviside};
 use plot;
-use circle::gen_even_set;
+use rand::Rng;
+use network::Network;
+use steps::ReLU;
+use data::{NormalRange, NormalizedSet};
 
-fn dist((px, py): (f64, f64), (zx, zy): (f64, f64)) -> f64 {
+pub fn dist((px, py): (f64, f64), (zx, zy): (f64, f64)) -> f64 {
 	((px - zx).powi(2) + (py - zy).powi(2)).sqrt()
 }
 
-const RANDOM_INPUT: &'static Fn() -> Vec<f64> = &|| {
+pub const RANDOM_INPUT: &'static Fn() -> Vec<f64> = &|| {
 	let mut rng = rand::thread_rng();
-	[rng.gen::<f64>() * 100.0, rng.gen::<f64>() * 100.0].to_vec()
+	[rng.gen::<f64>().abs() * 100.0, rng.gen::<f64>().abs() * 100.0].to_vec()
 };
 
-const CLASSIFY_FUNCTION: &'static Fn(f64, f64) -> Vec<f64> = &|x, y| {
-
-	if dist((x, y), (50.0, 40.0)) < 35.0 {
+pub const CLASSIFY_FUNCTION: &'static Fn(&[f64]) -> Vec<f64> = &|d| {
+	if dist((d[0] * 100.0, d[1] * 100.0), (50.0, 50.0)) < 30.0 {
 		[1.0, 0.0].to_vec()
 	} else {
 		[0.0, 1.0].to_vec()
 	}
 };
 
-fn gen_guide_points() -> Vec<Vec<f64>> {
+pub fn gen_guide_points(range: &NormalRange) -> Vec<Vec<f64>> {
 	let mut points = Vec::new();
 
 	for x in 0..100 {
 		for y in 0..100 {
-			if CLASSIFY_FUNCTION(x as f64, y as f64)[0] == 1.0 {
-				points.push([x as f64, y as f64].to_vec());
+			let normalized = range.point(&[x as f64, y as f64]);
+			if CLASSIFY_FUNCTION(&normalized)[0] == 1.0 {
+				points.push(normalized);
 			}
 		}
 	}
@@ -40,36 +38,64 @@ fn gen_guide_points() -> Vec<Vec<f64>> {
 	points
 }
 
-#[test]
-fn network_circle() {
+fn unmap(p: &[Vec<f64>], range: &NormalRange) -> Vec<Vec<f64>> {
+	p.iter().map(|i| range.reverse(i)).collect()
+}
 
-    let mut network = Network::build(2, &[2]);
+#[test]
+fn test_circle() {
+
+    let mut network = Network::build(2, &[5, 2]);
+
+    let step_fn = ReLU { scalar: 0.0 };
+    let data_range = NormalRange::new(&[0.0, 0.0], &[100.0, 100.0]);
+    let points: Vec<Vec<f64>> = (0..50000).map(|_| RANDOM_INPUT()).collect();
+
+    let training_set = NormalizedSet::with_bounds(
+    	&points,
+    	data_range.clone()
+    );
+
+    let points: Vec<Vec<f64>> = (0..500).map(|_| RANDOM_INPUT()).collect();
+
+    let active_set = NormalizedSet::with_bounds(
+    	&points,
+    	data_range.clone()
+    );
 
     train::train_network(&mut network,
-    	0.1,
-    	&gen_even_set(5000), 
+    	0.01,
+    	&training_set.data, 
     	false,
-    	|a, _| a < 10,
+    	|a, err| a == 0 || (a < 10 && err > 200.0),
     	CLASSIFY_FUNCTION,
-    	&ReLU{ scalar: 0.0 });
+    	&step_fn);
 
     let mut good_points = Vec::new();
     let mut bad_points = Vec::new();
-    let attempts = 50;
 
-	for _ in 0..attempts {
-		let input = RANDOM_INPUT();
-		println!("{:?} {:?}", CLASSIFY_FUNCTION(input[0], input[1]), network.process(&input, &Heaviside{}));
-		if CLASSIFY_FUNCTION(input[0], input[1])[0] == network.process(&input, &Heaviside{})[0].round() {
+    println!("Done Training");
+
+	for input in &active_set.data {
+		let expected = CLASSIFY_FUNCTION(input);
+		let found = network.process(input, &step_fn);
+		let error = expected.iter().zip(found.iter()).fold(0.0, |l, (&e, &f)| l + (e - f.round()).abs());
+		if error == 0.0 {
 			&mut good_points
 		} else {
+			println!("Failed {:?} vs {:?}", expected, found);
 			&mut bad_points
-		}.push(input);
+		}.push(input.clone());
 	}
 
-	println!("{} in {} ({}%) fail", bad_points.len(), attempts, (bad_points.len() as f64 / attempts as f64) * 100.0);
+	let percentage_failed = bad_points.len() as f64 / active_set.data.len() as f64;
+	let failed = percentage_failed > 0.2;
 
-	let percentage_failed = bad_points.len() as f64 / attempts as f64;
-	plot::plot2("Dual", gen_guide_points(), good_points, bad_points);
-	assert!(percentage_failed < 0.10);
+	println!("Percentage Failed: {}", percentage_failed * 100.0);
+
+	if failed {
+		plot::plot2("Dual", unmap(&gen_guide_points(&training_set.range), &data_range), unmap(&good_points, &data_range), unmap(&bad_points, &data_range));
+	}
+
+	assert!(!failed);
 }

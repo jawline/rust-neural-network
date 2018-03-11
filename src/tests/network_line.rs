@@ -19,7 +19,7 @@ const RANDOM_INPUT: &'static Fn() -> Vec<f64> = &|| {
 	[rng.gen::<f64>() * 100.0, rng.gen::<f64>() * 120.0].to_vec()
 };
 
-const CLASSIFY_FUNCTION: &'static Fn(f64, f64) -> Vec<f64> = &|x, y| [c1(x, y)].to_vec();
+const CLASSIFY_FUNCTION: &'static Fn(&[f64]) -> Vec<f64> = &|d| [c1(d[0], d[1])].to_vec();
 
 #[test]
 fn network_line() {

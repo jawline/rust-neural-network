@@ -60,7 +60,7 @@ fn main() {
 
     let step_fn = ReLU { scalar: 0.0 };
     let data_range = NormalRange::new(&[0.0, 0.0], &[100.0, 100.0]);
-    let points: Vec<Vec<f64>> = (0..3000).map(|_| RANDOM_INPUT()).collect();
+    let points: Vec<Vec<f64>> = (0..50000).map(|_| RANDOM_INPUT()).collect();
 
     let training_set = NormalizedSet::with_bounds(
     	&points,
@@ -78,7 +78,7 @@ fn main() {
     	0.075,
     	&training_set.data, 
     	false,
-    	|a, err| a == 0 || (a < 500 && err > 200.0),
+    	|a, err| a == 0 || (a < 10 && err > 200.0),
     	CLASSIFY_FUNCTION,
     	&step_fn);
 
@@ -100,9 +100,13 @@ fn main() {
 	}
 
 	let percentage_failed = bad_points.len() as f64 / active_set.data.len() as f64;
+	let failed = percentage_failed < 0.2;
 
 	println!("Percentage Failed: {}", percentage_failed * 100.0);
 
-	plot::plot2("Dual", unmap(&gen_guide_points(&training_set.range), &data_range), unmap(&good_points, &data_range), unmap(&bad_points, &data_range));
-	assert!(percentage_failed < 0.20);
+	if failed {
+		plot::plot2("Dual", unmap(&gen_guide_points(&training_set.range), &data_range), unmap(&good_points, &data_range), unmap(&bad_points, &data_range));
+	}
+
+	assert!(!failed);
 }
