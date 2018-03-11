@@ -11,10 +11,6 @@ impl Layer {
 		Layer { neurons: neurons.to_vec() }
 	}
 
-	pub fn len(self: &Layer) -> usize {
-		self.neurons.len()
-	}
-
 	pub fn forward<F: StepFn>(self: &mut Layer, inputs: &Vec<f64>, step: &F) -> Vec<f64> {
 		self.neurons.iter_mut().map(|ref mut neuron| {
 			neuron.activate(&inputs, step)
@@ -27,7 +23,7 @@ impl Layer {
 		    .iter_mut()
 		    .enumerate()
 		    .map(|(i, ref mut neuron)| {
-		    	errors[i] * step.derive(&neuron, neuron.output)
+		    	errors[i] * step.derive(neuron.output)
 		    }).collect()
 	}
 }

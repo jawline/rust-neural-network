@@ -33,7 +33,6 @@ fn network_line() {
     train::train_network(&mut network,
     	0.1,
     	&training_sample,
-    	false,
     	|a, _| a < 20,
     	CLASSIFY_FUNCTION,
     	&step_fn);

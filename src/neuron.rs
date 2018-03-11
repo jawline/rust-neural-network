@@ -29,7 +29,7 @@ impl Neuron {
 			.zip(self.weights.iter())
 			.fold(0.0, |last, (input, weight)| last + (input * weight));
 
-		self.output = step.transfer(self, sum);
+		self.output = step.transfer(sum);
 		self.output
 	}
 

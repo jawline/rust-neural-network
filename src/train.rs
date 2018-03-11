@@ -14,7 +14,7 @@ pub fn train_perceptron<F: StepFn, K, R>(p: &mut Neuron, rounds: usize, factor: 
 }
 
 pub fn train_network<F: StepFn, Classifier, ExitTest>(p: &mut Network, learn_rate: f64, training_set: &[Vec<f64>],
-			      apply_epoch: bool, exit_test: ExitTest, classifier: Classifier, step: &F)
+		exit_test: ExitTest, classifier: Classifier, step: &F)
 	where Classifier: Copy + Fn(&[f64]) -> Vec<f64>,
 		  ExitTest: Fn(usize, f64) -> bool {
 			  
@@ -26,7 +26,6 @@ pub fn train_network<F: StepFn, Classifier, ExitTest>(p: &mut Network, learn_rat
 	while exit_test(rounds, prev_error) {
 
 		let mut sum_error: f64 = 0.0;
-		let mut epoch_delta: Vec<Vec<f64>> = Vec::new();
 		
 		for input in training_set {
 			let expected = classifier(input);
@@ -35,14 +34,7 @@ pub fn train_network<F: StepFn, Classifier, ExitTest>(p: &mut Network, learn_rat
 			sum_error += delta_found.iter().fold(0.0, |l, n| l + n.powi(2)) / delta_found.len() as f64;
 
 			let deltas = p.backpropogate(delta_found, step);
-			
-			if !apply_epoch {
-				p.adjust_weights(&deltas, learn_rate);
-			}
-		}
-		
-		if apply_epoch {
-			println!("TODO: Apply epoch mode");
+			p.adjust_weights(&deltas, learn_rate);
 		}
 
 		if sum_error >= prev_error {
