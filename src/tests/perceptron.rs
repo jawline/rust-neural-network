@@ -1,7 +1,7 @@
 use tests::env::random_neuron;
 
 use train;
-use steps::{HEAVISIDE};
+use steps::Heaviside;
 
 use rand;
 use rand::Rng;
@@ -23,8 +23,9 @@ const CLASSIFY_FUNCTION: &'static Fn(f64, f64) -> f64 = &|x, y| c1(x, y);
 
 #[test]
 fn do_perceptron() {
+	let step_fn = Heaviside{};
     let mut perceptron = random_neuron(2);
-    train::train_perceptron(&mut perceptron, 10000, 0.05, RANDOM_INPUT, CLASSIFY_FUNCTION, HEAVISIDE);
+    train::train_perceptron(&mut perceptron, 10000, 0.05, RANDOM_INPUT, CLASSIFY_FUNCTION, &step_fn);
 
     let mut good_points = Vec::new();
     let mut bad_points = Vec::new();
@@ -32,7 +33,7 @@ fn do_perceptron() {
 
 	for _ in 0..attempts {
 		let input = RANDOM_INPUT();
-		if perceptron.activate(&input, HEAVISIDE) == c1(input[0], input[1]) {
+		if perceptron.activate(&input, &step_fn) == c1(input[0], input[1]) {
 			&mut good_points
 		} else {
 			&mut bad_points
@@ -42,8 +43,5 @@ fn do_perceptron() {
 	let percentage_failed = bad_points.len() as f64 / attempts as f64;
 
 	println!("{} in {} ({}%) fail", bad_points.len(), attempts, percentage_failed * 100.0);
-
-	//plot::plot("Perceptron", 100.0, cf(0.0), cf(100.0), good_points, bad_points);
-	//println!("{}", percentage_failed);
 	assert!(percentage_failed < 0.25);
 }

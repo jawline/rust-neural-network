@@ -3,7 +3,8 @@ use rand;
 use rand::Rng;
 
 use train;
-use steps::{TRANSFER, TRANSFER_DERIVITIVE};
+use steps::Heaviside;
+use plot;
 
 fn cf(x: f64) -> f64 {
 	1.0 * x + 4.0
@@ -27,13 +28,15 @@ fn network_line() {
 
     let training_sample: Vec<Vec<f64>> = (0..10000).map(|_| RANDOM_INPUT()).collect();
 
+    let step_fn = Heaviside{};
+
     train::train_network(&mut network,
-    	10,
     	0.1,
     	&training_sample,
+    	false,
+    	|a, _| a < 20,
     	CLASSIFY_FUNCTION,
-    	TRANSFER,
-    	TRANSFER_DERIVITIVE);
+    	&step_fn);
 
     let mut good_points = Vec::new();
     let mut bad_points = Vec::new();
@@ -41,7 +44,8 @@ fn network_line() {
 
 	for _ in 0..attempts {
 		let input = RANDOM_INPUT();
-		if c1(input[0], input[1]) == network.process(&input, TRANSFER)[0].round() {
+		println!("Pt {:?} vs {:?}", c1(input[0], input[1]), network.process(&input, &step_fn)[0].round());
+		if c1(input[0], input[1]) == network.process(&input, &step_fn)[0].round() {
 			&mut good_points
 		} else {
 			&mut bad_points
@@ -50,7 +54,11 @@ fn network_line() {
 
 	println!("{} in {} ({}%) fail", bad_points.len(), attempts, (bad_points.len() as f64 / attempts as f64) * 100.0);
 
-	let percentage_failed = bad_points.len() as f64 / attempts as f64;
-	//plot::plot("Network - Line", 100.0, cf(0.0), cf(100.0), good_points, bad_points);
-	assert!(percentage_failed < 0.25);
+	let passed = (bad_points.len() as f64 / attempts as f64) < 0.25;
+	
+	if !passed {
+		plot::plot("Network - Line", 100.0, cf(0.0), cf(100.0), good_points, bad_points);
+	}
+
+	assert!(passed);
 }

@@ -4,7 +4,6 @@ use rand::Rng;
 use network::Network;
 
 use train;
-use steps::{TRANSFER, TRANSFER_DERIVITIVE};
 use plot;
 
 pub fn dist((px, py): (f64, f64), (zx, zy): (f64, f64)) -> f64 {
@@ -13,12 +12,12 @@ pub fn dist((px, py): (f64, f64), (zx, zy): (f64, f64)) -> f64 {
 
 pub const RANDOM_INPUT: &'static Fn() -> Vec<f64> = &|| {
 	let mut rng = rand::thread_rng();
-	[rng.gen::<f64>() * 100.0, rng.gen::<f64>() * 100.0].to_vec()
+	[rng.gen::<f64>(), rng.gen::<f64>()].to_vec()
 };
 
 pub const CLASSIFY_FUNCTION: &'static Fn(f64, f64) -> Vec<f64> = &|x, y| {
 
-	if dist((x, y), (50.0, 40.0)) < 35.0 {
+	if dist((x * 100.0, y * 100.0), (50.0, 50.0)) < 20.0 {
 		[1.0, 0.0].to_vec()
 	} else {
 		[0.0, 1.0].to_vec()
@@ -51,5 +50,13 @@ pub fn gen(side: bool) -> Vec<f64> {
 }
 
 pub fn gen_even_set(num: usize) -> Vec<Vec<f64>> {
-	(0..num).map(|_| gen(true)).chain((0..num).map(|_| gen(false))).collect()
+	let mut res_set = Vec::new();
+	(0..num).map(|_| gen(true))
+			.zip((0..num).map(
+				|_| gen(false)))
+			.for_each(|(good, bad)| {
+				res_set.push(good);
+				res_set.push(bad);
+			});
+	res_set
 }

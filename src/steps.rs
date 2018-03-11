@@ -1,19 +1,43 @@
 use neuron::Neuron;
 
 pub trait StepFn {
-  fn transfer(&Neuron, f64) -> f64;
-  fn derive(&Neuron, f64) -> f64;
-};
+  fn transfer(&self, &Neuron, f64) -> f64;
+  fn derive(&self, &Neuron, f64) -> f64;
+}
 
 pub struct Heaviside {}
 pub struct Sigmoid {}
 
+pub struct ReLU {
+	pub scalar: f64
+}
+
 impl StepFn for Heaviside {
-  fn transfer(n:&Neuron, v:f64) -> f64 { if v > 0.5 { 1.0 } else { 0.0 } }
-  fn derive(n:&Neuron, v:f64) -> f64 { v }
+  fn transfer(&self, n:&Neuron, v:f64) -> f64 { if v > 0.5 { 1.0 } else { 0.0 } }
+  fn derive(&self, n:&Neuron, v:f64) -> f64 { 1.0 }
 }
 
 impl StepFn for Sigmoid {
-  fn transfer(n:&Neuron, v:f64) -> f64 { 1.0 / (1.0 + -v.exp()) }
-  fn derive(n:&Neuron, v:f64) -> f64 { v * (1.0 - v) }
+  fn transfer(&self, n:&Neuron, v:f64) -> f64 { 1.0 / (1.0 + -v.exp()) }
+  fn derive(&self, n:&Neuron, v:f64) -> f64 { v * (1.0 - v) }
+}
+
+impl StepFn for ReLU {
+  
+  fn transfer(&self, n:&Neuron, v:f64) -> f64 { 
+  	if v > 0.0 {
+  		v
+  	} else {
+  		self.scalar * v
+  	}
+  }
+  
+  fn derive(&self, n:&Neuron, v:f64) -> f64 {
+  	if v > 0.0 {
+      1.0
+    } else {
+      0.0
+    }
+  }
+
 }

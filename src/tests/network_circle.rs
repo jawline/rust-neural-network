@@ -4,7 +4,7 @@ use rand::Rng;
 use network::Network;
 
 use train;
-use steps::{TRANSFER, TRANSFER_DERIVITIVE};
+use steps::{Sigmoid, ReLU, Heaviside};
 use plot;
 use circle::gen_even_set;
 
@@ -46,21 +46,21 @@ fn network_circle() {
     let mut network = Network::build(2, &[2]);
 
     train::train_network(&mut network,
-    	30,
     	0.1,
-    	&gen_even_set(100000), 
+    	&gen_even_set(5000), 
+    	false,
+    	|a, _| a < 10,
     	CLASSIFY_FUNCTION,
-    	TRANSFER,
-    	TRANSFER_DERIVITIVE);
+    	&ReLU{ scalar: 0.0 });
 
     let mut good_points = Vec::new();
     let mut bad_points = Vec::new();
-    let attempts = 250;
+    let attempts = 50;
 
 	for _ in 0..attempts {
 		let input = RANDOM_INPUT();
-		println!("{:?} {:?}", CLASSIFY_FUNCTION(input[0], input[1]), network.process(&input, TRANSFER));
-		if CLASSIFY_FUNCTION(input[0], input[1])[0] == network.process(&input, TRANSFER)[0].round() {
+		println!("{:?} {:?}", CLASSIFY_FUNCTION(input[0], input[1]), network.process(&input, &Heaviside{}));
+		if CLASSIFY_FUNCTION(input[0], input[1])[0] == network.process(&input, &Heaviside{})[0].round() {
 			&mut good_points
 		} else {
 			&mut bad_points
