@@ -1,7 +1,7 @@
 use neuron::Neuron;
 use steps::StepFn;
 
-#[derive(Clone)]
+#[derive(Clone, RustcDecodable, RustcEncodable)]
 pub struct Layer {
 	neurons: Vec<Neuron>
 }
@@ -28,6 +28,7 @@ impl Layer {
 	}
 }
 
+#[derive(RustcDecodable, RustcEncodable)]
 pub struct Network {
 	layers: Vec<Layer>
 }

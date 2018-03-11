@@ -7,4 +7,5 @@ authors = ["Blake Loring <blake@parsed.uk>"]
 rand = "0.4"
 gnuplot = "*"
 csv = "*"
+rustc-serialize = "*"
 rust_graph = { git = 'https://github.com/jawline/rust-graph.git' }

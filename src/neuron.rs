@@ -2,7 +2,7 @@ use rand;
 use rand::Rng;
 use steps::StepFn;
 
-#[derive(Clone)]
+#[derive(Clone, RustcDecodable, RustcEncodable)]
 pub struct Neuron {
 	pub weights: Vec<f64>,
 	pub bias: f64,

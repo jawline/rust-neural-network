@@ -49,7 +49,7 @@ fn test_circle() {
 
     let step_fn = ReLU { scalar: 0.0 };
     let data_range = NormalRange::new(&[0.0, 0.0], &[100.0, 100.0]);
-    let points: Vec<Vec<f64>> = (0..50000).map(|_| RANDOM_INPUT()).collect();
+    let points: Vec<Vec<f64>> = (0..10000).map(|_| RANDOM_INPUT()).collect();
 
     let training_set = NormalizedSet::with_bounds(
     	&points,
@@ -64,9 +64,9 @@ fn test_circle() {
     );
 
     train::train_network(&mut network,
-    	0.01,
+    	0.05,
     	&training_set.data,
-    	|a, err| a == 0 || (a < 10 && err > 200.0),
+    	|a, err| a == 0 || (a < 20 && err > 200.0),
     	CLASSIFY_FUNCTION,
     	&step_fn);
 

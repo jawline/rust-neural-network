@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+extern crate rustc_serialize;
 extern crate csv;
 extern crate rand;
 extern crate gnuplot;
