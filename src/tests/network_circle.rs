@@ -65,8 +65,9 @@ fn test_circle() {
 
     train::train_network(&mut network,
     	0.05,
+    	|rate, cur, prev| if cur >= prev { rate * 0.95 } else { rate },
     	&training_set.data,
-    	|a, err| a == 0 || (a < 20 && err > 200.0),
+    	|a, _err| a < 30,
     	CLASSIFY_FUNCTION,
     	&step_fn);
 

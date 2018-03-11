@@ -32,8 +32,9 @@ fn network_line() {
 
     train::train_network(&mut network,
     	0.1,
+    	|rate, cur, prev| if cur >= prev { rate * 0.95 } else { rate },
     	&training_sample,
-    	|a, _| a < 20,
+    	|a, _| a < 30,
     	CLASSIFY_FUNCTION,
     	&step_fn);
 

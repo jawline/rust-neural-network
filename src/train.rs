@@ -13,10 +13,11 @@ pub fn train_perceptron<F: StepFn, K, R>(p: &mut Neuron, rounds: usize, factor: 
 	}
 }
 
-pub fn train_network<F: StepFn, Classifier, ExitTest>(p: &mut Network, learn_rate: f64, training_set: &[Vec<f64>],
+pub fn train_network<F: StepFn, LearnSlope, Classifier, ExitTest>(p: &mut Network, learn_rate: f64, learn_slope: LearnSlope, training_set: &[Vec<f64>],
 		exit_test: ExitTest, classifier: Classifier, step: &F)
 	where Classifier: Copy + Fn(&[f64]) -> Vec<f64>,
-		  ExitTest: Fn(usize, f64) -> bool {
+		  ExitTest: Fn(usize, f64) -> bool,
+		  LearnSlope: Fn(f64, f64, f64) -> f64 {
 			  
 	let mut round_errors: Vec<f64> = Vec::new();
 	let mut rounds = 0;
@@ -37,12 +38,7 @@ pub fn train_network<F: StepFn, Classifier, ExitTest>(p: &mut Network, learn_rat
 			p.adjust_weights(&deltas, learn_rate);
 		}
 
-		if sum_error >= prev_error {
-			learn_rate -= 0.001;
-			if learn_rate < 0.0001 {
-				learn_rate = 0.0001;
-			}
-		}
+		learn_rate = learn_slope(learn_rate, sum_error, prev_error);
 
 		println!("round={} error={} rate={}", rounds, sum_error, learn_rate);
 		
