@@ -3,6 +3,61 @@ use std::fs::File;
 use std::io::Write;
 use csv;
 
+pub struct NormalRange {
+	pub min: Vec<f64>,
+	pub max: Vec<f64>
+}
+
+impl NormalRange {
+	
+	pub fn new(min: Vec<f64>, max: Vec<f64>) -> NormalRange {
+		NormalRange {
+			min: min,
+			max: max
+		}
+	}
+
+	pub fn point(self: &NormalRange, p: &[f64]) -> Vec<f64> {
+		let mut result = Vec::with_capacity(p.len());
+
+		for i in 0..p.len() {
+			result.push((p[i] - self.min[i]) / (self.max[i] - self.min[i]));
+		}
+
+		result
+	}
+
+	pub fn reverse(self: &NormalRange, p: &[f64]) -> Vec<f64> {
+		let mut result = Vec::with_capacity(p.len());
+
+		for i in 0..p.len() {
+			result.push((p[i] * (self.max[i] - self.min[i])) + self.min[i]);
+		}
+
+		result	
+	}
+}
+
+pub struct NormalizedSet {
+	pub data: Vec<Vec<f64>>,
+	pub range: NormalRange
+}
+
+impl NormalizedSet {
+
+	fn normalize_data(set: &[Vec<f64>], range: &NormalRange) -> Vec<Vec<f64>> {
+		set.iter().map(|i| range.point(i)).collect()
+	}
+
+	pub fn with_bounds(set: &[Vec<f64>], min: &[f64], max: &[f64]) -> NormalizedSet {
+		let range = NormalRange::new(min.to_vec(), max.to_vec());
+		NormalizedSet {
+			data: NormalizedSet::normalize_data(set, &range),
+			range: range
+		}
+	}
+}
+
 pub fn load_data(file_path: &str) -> Result<Vec<Vec<f64>>, Box<Error>> {
     let file = File::open(file_path)?;
     let mut rdr = csv::Reader::from_reader(file).has_headers(false);
