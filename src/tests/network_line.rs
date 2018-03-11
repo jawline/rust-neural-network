@@ -24,7 +24,7 @@ const CLASSIFY_FUNCTION: &'static Fn(&[f64]) -> Vec<f64> = &|d| [c1(d[0], d[1])]
 #[test]
 fn network_line() {
 
-    let mut network = Network::build(2, &[4, 1]);
+    let mut network = Network::build(2, &[1]);
 
     let training_sample: Vec<Vec<f64>> = (0..10000).map(|_| RANDOM_INPUT()).collect();
 
