@@ -45,9 +45,9 @@ fn unmap(p: &[Vec<f64>], range: &NormalRange) -> Vec<Vec<f64>> {
 #[test]
 fn test_circle() {
 
-    let mut network = Network::build(2, &[5, 2]);
+    let mut network = Network::build(2, &[3, 2]);
 
-    let step_fn = ReLU { scalar: 0.0 };
+    let step_fn = ReLU { scalar: 0.01 };
     let data_range = NormalRange::new(&[0.0, 0.0], &[100.0, 100.0]);
     let points: Vec<Vec<f64>> = (0..10000).map(|_| RANDOM_INPUT()).collect();
 
