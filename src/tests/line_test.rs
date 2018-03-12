@@ -22,7 +22,7 @@ const RANDOM_INPUT: &'static Fn() -> Vec<f64> = &|| {
 const CLASSIFY_FUNCTION: &'static Fn(&[f64]) -> Vec<f64> = &|d| [c1(d[0], d[1])].to_vec();
 
 #[test]
-fn network_line() {
+fn line_test() {
 
     let mut network = Network::build(2, &[1]);
 

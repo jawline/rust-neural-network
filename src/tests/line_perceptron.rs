@@ -1,8 +1,6 @@
-use tests::env::random_neuron;
-
 use train;
 use steps::Heaviside;
-
+use neuron::Neuron;
 use rand;
 use rand::Rng;
 
@@ -22,9 +20,9 @@ const RANDOM_INPUT: &'static Fn() -> Vec<f64> = &|| {
 const CLASSIFY_FUNCTION: &'static Fn(f64, f64) -> f64 = &|x, y| c1(x, y);
 
 #[test]
-fn do_perceptron() {
+fn perceptron_line() {
 	let step_fn = Heaviside{};
-    let mut perceptron = random_neuron(2);
+    let mut perceptron = Neuron::random(2);
     train::train_perceptron(&mut perceptron, 10000, 0.05, RANDOM_INPUT, CLASSIFY_FUNCTION, &step_fn);
 
     let mut good_points = Vec::new();
