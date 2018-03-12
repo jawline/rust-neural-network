@@ -19,3 +19,10 @@ pub fn plot2(title: &str, guide_points: Vec<Vec<f64>>, good_points: Vec<Vec<f64>
 		.points(&extract(&good_points), "green")
 		.show();
 }
+
+pub fn plot3(title: &str, good_points: Vec<Vec<f64>>, bad_points: Vec<Vec<f64>>) {
+	Graph::new(title)
+		.points(&extract(&bad_points), "red")
+		.points(&extract(&good_points), "green")
+		.show();
+}
