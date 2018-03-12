@@ -14,8 +14,8 @@ pub fn train_perceptron<F: StepFn, K, R>(p: &mut Neuron, rounds: usize, factor: 
 }
 
 pub fn train_network<F: StepFn, LearnSlope, Classifier, ExitTest>(p: &mut Network, learn_rate: f64, learn_slope: LearnSlope, training_set: &[Vec<f64>],
-		exit_test: ExitTest, classifier: Classifier, step: &F)
-	where Classifier: Copy + Fn(&[f64]) -> Vec<f64>,
+		exit_test: ExitTest, classifier: &Classifier, step: &F)
+	where Classifier: Fn(&[f64]) -> Vec<f64>,
 		  ExitTest: Fn(usize, f64) -> bool,
 		  LearnSlope: Fn(f64, f64, f64) -> f64 {
 			  

@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fs::File;
 use std::io::Write;
+use std::io::Read;
 use csv;
 
 #[derive(Clone)]
@@ -53,6 +54,13 @@ impl NormalizedSet {
 			range: range
 		}
 	}
+}
+
+pub fn load_binary(file_path: &str, size: usize) -> Result<Vec<u8>, Box<Error>> {
+    let mut f = File::open(file_path)?;
+    let mut buffer = Vec::with_capacity(size);
+    f.read(&mut buffer)?;
+    Ok(buffer)
 }
 
 pub fn load_data(file_path: &str) -> Result<Vec<Vec<f64>>, Box<Error>> {
