@@ -58,7 +58,7 @@ impl NormalizedSet {
 
 pub fn load_binary(file_path: &str, size: usize) -> Result<Vec<u8>, Box<Error>> {
     let mut f = File::open(file_path)?;
-    let mut buffer = Vec::with_capacity(size);
+    let mut buffer = vec![0; size];
     f.read(&mut buffer)?;
     Ok(buffer)
 }
