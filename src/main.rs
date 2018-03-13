@@ -59,7 +59,7 @@ fn main() {
     let a_norm: Vec<f64> = a.iter().map(|i| i / 255.0).collect();
 
     let classify = |input:&[f64]| {
-        [if input.iter().eq(a_norm.iter()) { 1.0 } else { 0.0 }].to_vec()
+        [if input.iter().eq(a_norm.iter()) { 97.0 / 255.0 } else { 0.0 }].to_vec()
     };
 
     let mut network = Network::build(35 * 35 * 3, &[4, 1]);
