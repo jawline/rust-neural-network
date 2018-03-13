@@ -55,6 +55,7 @@ fn mix(l1: &[Vec<f64>], l2: &[Vec<f64>]) -> Vec<Vec<f64>> {
 fn main() {
 
     let a: Vec<f64> = data::load_binary("./training/chars/a.data", 35 * 35 * 3).unwrap().iter().map(|x| *x as f64).collect();
+    let c: Vec<f64> = data::load_binary("./training/chars/c.data", 35 * 35 * 3).unwrap().iter().map(|x| *x as f64).collect();
 
     let a_norm: Vec<f64> = a.iter().map(|i| i / 255.0).collect();
 
@@ -94,10 +95,10 @@ fn main() {
 		let found = network.process(input, &step_fn);
 		let error = expected.iter().zip(found.iter()).fold(0.0, |l, (&e, &f)| l + (e - f).abs());
 		if error == 0.0 {
-            println!("Good {:?} vs {:?}", expected, found);
+            println!("Good {:?} vs {:?}", expected[0] * 255.0, found[0] * 255.0);
 			&mut good_points
 		} else {
-			println!("Failed {:?} vs {:?}", expected, found);
+            println!("Bad {:?} vs {:?}", expected[0] * 255.0, found[0] * 255.0);
 			&mut bad_points
 		}.push(input.clone());
 	}
