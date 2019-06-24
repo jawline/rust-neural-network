@@ -12,46 +12,31 @@ mod train;
 mod plot;
 mod steps;
 mod network;
-
 #[cfg(test)]
 mod tests;
 
-
-use rand::distributions::{Sample, Range};
+use std::iter;
+use rand::Rng;
+use rand::distributions::{Uniform};
 use network::Network;
 use steps::{Sigmoid, Tanh, ReLU };
 use data::{NormalRange, NormalizedSet};
 
 fn gen_random_elements(size: usize) -> Vec<Vec<f64>> {
-    let mut between = Range::new(0.0, 255.0);
     let mut rng = rand::thread_rng();
-
-    let mut r_list = Vec::new();
-    
-    for _ in 0..size {
-        let mut list_item = Vec::new();
-        
-        for _ in 0..(35 * 35 * 3) {
-            list_item.push(between.sample(&mut rng) as f64);
-        }
-
-        r_list.push(list_item);
-    }
-
-    r_list
+    (0..size).map(|_|
+      (0..(35*35*3)).map(|_| rng.sample(Uniform::new(0.0, 255.0))).collect()
+    ).collect()
 }
 
 fn mix(l1: &[Vec<f64>], l2: &[Vec<f64>]) -> Vec<Vec<f64>> {
     let mut res = Vec::new();
-    
     for i in 0..l1.len() {
         res.push(l1[i].clone());
-
         if i < l2.len() {
             res.push(l2[i].clone());
         }
     }
-
     res
 }
 
@@ -67,25 +52,25 @@ fn main() {
 
     let classify = |input:&[f64]| {
         [if input.iter().eq(a_norm.iter()) {
-            50.0 / 255.0 
+          (1.0, 0.0) 
         } else if input.iter().eq(a_2_norm.iter()) {
-            50.0 / 255.0 
+          (1.0, 0.0)
         } else if input.iter().eq(c_norm.iter()) {
-            100.0 / 255.0 
+          (0.0, 1.0) 
         } else {
-            0.0
+          (0.0, 1.0)
         }].to_vec()
     };
 
-    let mut network = Network::build(35 * 35 * 3, &[3, 1]);
+    let mut network = Network::build(35 * 35 * 3, &[10, 2]);
 
-    let step_fn = Tanh {};
+    let step_fn = Tanh{};
 
     let min_input = [0.0; 35 * 35 * 3];
     let max_input = [255.0; 35 * 35 * 3];
-    let a_list: Vec<Vec<f64>> = std::iter::repeat(&a).take(1000).map(|a| a.clone()).collect();
-    let a_2_list: Vec<Vec<f64>> = std::iter::repeat(&a).take(1000).map(|a| a.clone()).collect();
-    let c_list: Vec<Vec<f64>> = std::iter::repeat(&c).take(1000).map(|a| c.clone()).collect();
+    let a_list: Vec<Vec<f64>> = std::iter::repeat(&a).take(50).map(|a| a.clone()).collect();
+    let a_2_list: Vec<Vec<f64>> = std::iter::repeat(&a_2).take(50).map(|a| a.clone()).collect();
+    let c_list: Vec<Vec<f64>> = std::iter::repeat(&c).take(50).map(|a| c.clone()).collect();
     let elems: Vec<Vec<f64>> = mix(&gen_random_elements(1000), &a_list);
     let elems: Vec<Vec<f64>> = mix(&elems, &c_list);
     let elems: Vec<Vec<f64>> = mix(&elems, &a_2_list);
@@ -97,7 +82,7 @@ fn main() {
     	0.1,
     	|rate, cur, prev| if cur >= prev { rate * 0.75 } else { rate },
     	&training_data.data,
-    	|a, err| a < 10,
+    	|a, err| a < 20,
     	&classify,
     	&step_fn);
 
@@ -108,15 +93,19 @@ fn main() {
     let mut good_points = Vec::new();
     let mut bad_points = Vec::new();
 
-	for input in &[a_2_norm.clone()] {
+	for input in &[a_norm.clone(), a_2_norm.clone(), c_norm.clone()] {
+    use std::iter::once;
 		let expected = classify(input);
 		let found = network.process(input, &step_fn);
-		let error = expected.iter().zip(found.iter()).fold(0.0, |l, (&e, &f)| l + (e * 255.0 - f * 255.0).abs().round());
+		let error = expected
+      .iter()
+      .flat_map(|(x1, x2)| once(x1).chain(once(x2)))
+      .zip(found.iter()).fold(0.0, |l, (&e, &f)| l + (e - f).abs().round());
 		if error == 0.0 {
-            println!("Good {:?} vs {:?}", expected[0] * 255.0, found[0] * 255.0);
+            println!("Good {:?} vs {:?}", expected, found);
 			&mut good_points
 		} else {
-            println!("Bad {:?} vs {:?}", expected[0] * 255.0, found[0] * 255.0);
+            println!("Bad {:?} vs {:?}", expected, found);
 			&mut bad_points
 		}.push(input.clone());
 	}

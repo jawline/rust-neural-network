@@ -15,7 +15,7 @@ pub fn train_perceptron<F: StepFn, K, R>(p: &mut Neuron, rounds: usize, factor: 
 
 pub fn train_network<F: StepFn, LearnSlope, Classifier, ExitTest>(p: &mut Network, learn_rate: f64, learn_slope: LearnSlope, training_set: &[Vec<f64>],
 		exit_test: ExitTest, classifier: &Classifier, step: &F)
-	where Classifier: Fn(&[f64]) -> Vec<f64>,
+	where Classifier: Fn(&[f64]) -> Vec<(f64, f64)>,
 		  ExitTest: Fn(usize, f64) -> bool,
 		  LearnSlope: Fn(f64, f64, f64) -> f64 {
 			  
@@ -26,12 +26,17 @@ pub fn train_network<F: StepFn, LearnSlope, Classifier, ExitTest>(p: &mut Networ
 			  
 	while exit_test(rounds, prev_error) {
 
+    use std::iter::once;
 		let mut sum_error: f64 = 0.0;
 		
 		for input in training_set {
 			let expected = classifier(input);
 			let found = p.process(input, step);
-			let delta_found: Vec<f64> = expected.iter().zip(found.iter()).map(|(exp, found)| exp - found).collect();
+			let delta_found: Vec<f64> = expected
+        .iter()
+        .flat_map(|(x, y)| once(x).chain(once(y)))
+        .zip(found.iter())
+        .map(|(e1, f1)| (*e1 - f1)).collect();
 			sum_error += delta_found.iter().fold(0.0, |l, n| l + n.powi(2)) / delta_found.len() as f64;
 
 			let deltas = p.backpropogate(delta_found, step);

@@ -10,8 +10,7 @@ pub struct NormalRange {
 	pub max: Vec<f64>
 }
 
-impl NormalRange {
-	
+impl NormalRange {	
 	pub fn new(min: &[f64], max: &[f64]) -> NormalRange {
 		NormalRange {
 			min: min.to_vec(),
@@ -43,7 +42,6 @@ pub struct NormalizedSet {
 }
 
 impl NormalizedSet {
-
 	fn normalize_data(set: &[Vec<f64>], range: &NormalRange) -> Vec<Vec<f64>> {
 		set.iter().map(|i| range.point(i)).collect()
 	}
@@ -65,33 +63,25 @@ pub fn load_binary(file_path: &str, size: usize) -> Result<Vec<u8>, Box<Error>> 
 
 pub fn load_data(file_path: &str) -> Result<Vec<Vec<f64>>, Box<Error>> {
     let file = File::open(file_path)?;
-    let mut rdr = csv::Reader::from_reader(file).has_headers(false);
-    let mut results = Vec::new();
-
-    for line in rdr.records() {
-        results.push(line?.iter().map(|x| x.parse::<f64>().unwrap()).collect());
-    }
-
+    let mut rdr = csv::Reader::from_reader(file);
+    let results = rdr
+      .records()
+      .map(|line| line.unwrap().iter().map(|x| x.parse::<f64>().unwrap()).collect())
+      .collect(); 
     Ok(results)
 }
 
 pub fn write_data(file_path: &str, data: &[Vec<f64>]) -> Result<(), Box<Error>> {
 	let mut f = File::create(file_path)?;
-
 	for line in data {
-
 		let mut first = true;
-		
 		for word in line {
-			
 			if !first {
 				write!(f, ",")?;
 			}
-
 			write!(f, "{}", word.to_string())?;
 			first = false;
 		}
-
 		write!(f, "\n")?;
 	}
 
