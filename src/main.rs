@@ -14,6 +14,7 @@ mod steps;
 mod network;
 #[cfg(test)]
 mod tests;
+mod layer;
 
 use std::iter;
 use rand::Rng;

@@ -13,31 +13,29 @@ pub struct Neuron {
 impl Neuron {
 
 	pub fn new(weights: Vec<f64>, bias: f64) -> Neuron {
+    let n_weights = weights.len();
 		Neuron {
 			weights: weights,
 			bias: bias,
 			output: 0.0,
-			inputs: Vec::new()
+			inputs: (0..n_weights).map(|_| 0.0).collect()
 		}
 	}
 
-	pub fn activate<F: StepFn>(self: &mut Neuron, input: &Vec<f64>, step: &F) -> f64 {
-
-		self.inputs = input.clone();
-
+	pub fn activate<F: StepFn>(self: &mut Neuron, input: &[f64], step: &F) -> f64 {
+    input.iter().enumerate().for_each(|(i, ref v)| self.inputs[i] = **v);
 		let sum = self.bias + input.iter()
 			.zip(self.weights.iter())
 			.fold(0.0, |last, (input, weight)| last + (input * weight));
-
 		self.output = step.transfer(sum);
 		self.output
 	}
 
 	pub fn adjust(self: &mut Neuron, delta: f64, learn_rate: f64) {
-		self.weights = self.weights
-			.iter()
+		self.weights
+			.iter_mut()
 			.zip(self.inputs.iter())
-			.map(|(weight, input)| weight + (delta * learn_rate * input)).collect();
+			.for_each(|(ref mut weight, input)| **weight = **weight + (delta * learn_rate * input));
 		self.bias += delta * learn_rate;
 	}
 
