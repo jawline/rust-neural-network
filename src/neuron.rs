@@ -11,7 +11,6 @@ pub struct Neuron {
 }
 
 impl Neuron {
-
 	pub fn new(weights: Vec<f64>, bias: f64) -> Neuron {
     let n_weights = weights.len();
 		Neuron {
